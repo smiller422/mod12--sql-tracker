@@ -1,9 +1,10 @@
-const express = require('express');
+
 const inquirer = require('inquirer');
-const data = require('./terms.json');
+
 
 // npm install mysql2 inquirer console.table
 const mysql = require('mysql2');
+const consoleTable = require('console.table')
 
 const connection = mysql.createConnection({
     host: 'localhost',
