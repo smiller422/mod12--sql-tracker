@@ -7,14 +7,14 @@ VALUES ("Engeneering"),
 
 
 INSERT INTO role (title, department_id, salary,)
-VALUES ("Sales Lead" 4  100000),
-       ("Salesperson" 4  80000),
-       ("Lead Engeneer" 1  150000),
-       ("Software Engeneer" 1  120000),
-       ("Account Manager" 2  160000),
-       ("Accountant" 2  125000),
-       ("Legal Team lead" 3 250000),
-       ("Lawyer" 3 190000);
+VALUES ("Sales Lead", 4 , 100000),
+       ("Salesperson", 4 , 80000),
+       ("Lead Engeneer", 1 , 150000),
+       ("Software Engeneer", 1,  120000),
+       ("Account Manager" ,2 , 160000),
+       ("Accountant", 2,  125000),
+       ("Legal Team lead" ,3 ,250000),
+       ("Lawyer", 3 ,190000);
        
 
 
