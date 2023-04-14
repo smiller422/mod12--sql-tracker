@@ -1,5 +1,5 @@
 const inquirer = require("inquirer");
-const util = require('util');
+const util = require("util");
 // npm install mysql2 inquirer console.table
 const mysql = require("mysql2");
 const consoleTable = require("console.table");
@@ -48,7 +48,7 @@ function mainMenuQuestions() {
           console.log("here are all the departments");
           break;
         case "View all roles":
-        viewAllRoles()
+          viewAllRoles();
           // Perform action to view all roles
           break;
         case "View all employees":
@@ -64,6 +64,7 @@ function mainMenuQuestions() {
           // Perform action to add a role
           break;
         case "Add an employee":
+          addEmployee();
           // Perform action to add an employee
           break;
         case "Update an employee role":
@@ -81,17 +82,18 @@ function mainMenuQuestions() {
 //  including employee ids, first names, last names, job titles, departments, salaries,
 //   and managers that the employees report to
 const viewAllEmployees = () => {
-var queryString = "SELECT e.id, e.first_name, e.last_name, r.title,"
-  queryString += "d.name, r.salary, mgr.first_name as mgrFirstName, mgr.last_name as mgrLastName FROM employee e "
-  queryString += "left join role r on e.role_id = r.id "
-  queryString += "left join department d on r.department_id = d.id "
-  queryString += "left join employee mgr on mgr.id = e.manager_id;"
+  var queryString = "SELECT e.id, e.first_name, e.last_name, r.title,";
+  queryString +=
+    "d.name, r.salary, mgr.first_name as mgrFirstName, mgr.last_name as mgrLastName FROM employee e ";
+  queryString += "left join role r on e.role_id = r.id ";
+  queryString += "left join department d on r.department_id = d.id ";
+  queryString += "left join employee mgr on mgr.id = e.manager_id;";
 
   connection.query(queryString, (err, results) => {
     if (err) throw err;
-    console.log(results)
+    console.log(results);
     console.table(results);
-    mainMenuQuestions()
+    mainMenuQuestions();
   });
 };
 
@@ -99,14 +101,14 @@ const viewAllDepartments = () => {
   connection.query("SELECT * FROM department", (err, results) => {
     if (err) throw err;
     console.table(results);
-    mainMenuQuestions()
+    mainMenuQuestions();
   });
 };
 const viewAllRoles = () => {
-  connection.query("SELECT * FROM department", (err, results) => {
+  connection.query("SELECT * FROM role", (err, results) => {
     if (err) throw err;
     console.table(results);
-    mainMenuQuestions()
+    mainMenuQuestions();
   });
 };
 
@@ -128,117 +130,132 @@ const addDepartment = () => {
         (err, results) => {
           if (err) throw err;
           console.log("Department added successfully");
-          mainMenuQuestions()
+          mainMenuQuestions();
         }
       );
     });
 };
 
-const addRole = async () => {
-  const query = util.promisify(connection.query).bind(connection);
-  let departmentList
-  await query("SELECT * FROM department", (err, results) => {
-if (err) throw err;
- departmentList = Object.values(results);
- inquirer
- .prompt([
-   {
-     type: "input",
-     name: "title",
-     message: "Enter the name of the role:",
-   },
-   {
-     type: "input",
-     name: "salary",
-     message: "Enter the salary:",
-   },
-   {
-     type: "list",
-     message: "Chose department",
-     name: "department",
-     choices: departmentList
-   },
- ])
- .then((answers) => {
-   const salary = parseFloat(answers.salary).toFixed(2)
-   const departmentId = answers.department 
-   connection.query(
-     "INSERT INTO role SET ?",
-     { title: answers.title, 
-       salary: salary
-      },
-     (err, results) => {
-       if (err) throw err;
-       console.log("Role added successfully");
-       mainMenuQuestions()
-     }
-   );
- })});
-console.log("are u here")
- 
+const executeQuery = (queryString) => {
+  connection.query(queryString, (err, results) => {
+    if (err) throw err;
+    console.table(results);
+    mainMenuQuestions();
+  });
 };
 
+const addRole = async () => {
+  let departmentList = await executeQuery("SELECT * FROM department");
+  // const departmentList = await util.promisify(connection.query).bind(connection)("SELECT * FROM department");
+  // const query = util.promisify(connection.query).bind(connection);
+  // let departmentList
+  executeQuery("SELECT * FROM role", (err, results) => {
+    if (err) throw err;
+    departmentList = Object.values(results);
+    inquirer
+      .prompt([
+        {
+          type: "input",
+          name: "title",
+          message: "Enter the name of the role:",
+        },
+        {
+          type: "input",
+          name: "salary",
+          message: "Enter the salary:",
+        },
+        {
+          type: "list",
+          message: "Chose department",
+          name: "department",
+          choices: departmentList,
+        },
+      ])
+      .then((answers) => {
+        const salary = parseFloat(answers.salary).toFixed(2);
+        const departmentId = answers.department;
+        //  connection.query(
+        executeQuery(
+          "INSERT INTO role SET ?",
+          { title: answers.title, salary: salary, department_id: departmentId },
+          (err, results) => {
+            if (err) throw err;
+            console.log("Role added successfully");
+            mainMenuQuestions();
+          }
+        );
+      });
+  });
+  console.log("are u here");
+};
 
 const addEmployee = async () => {
   const query = util.promisify(connection.query).bind(connection);
-  let employeeList  = await query("SELECT * FROM employee");
+  let employeeList = await query("SELECT * FROM employee");
   const managerList = await query("SELECT * FROM manager");
-//   await query("SELECT * FROM employee", (err, results) => {
-// if (err) throw err;
-//  employeeList = Object.values(results);
- inquirer
- .prompt([
-   {
-     type: "input",
-     name: "firstName",
-     message: "Enter the first name of the employee:",
-   },
-   {
-     type: "input",
-     name: "lastName",
-     message: "Enter the last name of the employee:",
-   },
-   {
-     type: "list",
-     name: "roleId",
-     message: "Select the role:",
-   },
-   {
-     type: "list",
-     name: "managerId",
-     message: "Select employees manager",
-     choices: [
-      { name: "None", value: null },
-      ...managerList.map((manager) => ({
-        name: `${manager.first_name} ${manager.last_name}`,
-        value: manager.id,
-   })),
- ]}]
- .then((answers) => {
-  connection.query(
-    "INSERT INTO employee SET ?",
-    {
-      first_name: answers.firstName,
-      last_name: answers.lastName,
-      role_id: answers.roleId,
-      manager_id: answers.managerId,
-    },
-    (err, results) => {
-      if (err) throw err;
-      console.log("Employee added successfully");
-      mainMenuQuestions();
-    }
+  const roleList = await query("SELECT * FROM role");
+  //   await query("SELECT * FROM employee", (err, results) => {
+  // if (err) throw err;
+  //  employeeList = Object.values(results);
+  inquirer.prompt(
+    [
+      {
+        type: "input",
+        name: "firstName",
+        message: "Enter the first name of the employee:",
+      },
+      {
+        type: "input",
+        name: "lastName",
+        message: "Enter the last name of the employee:",
+      },
+      {
+        type: "list",
+        name: "roleId",
+        message: "Select the role:",
+        choices: roleList.map((role) => ({
+          name: role.title,
+          value: role.id,
+        })),
+      },
+      {
+        type: "list",
+        name: "managerId",
+        message: "Select employees manager",
+        choices: [
+          { name: "None", value: null },
+          ...managerList.map((manager) => ({
+            name: `${manager.first_name} ${manager.last_name}`,
+            value: manager.id,
+          })),
+        ],
+      },
+    ]
+    .then(async (answers) => {
+      await query(
+        "INSERT INTO employee SET ?",
+        {
+          first_name: answers.firstName,
+          last_name: answers.lastName,
+          role_id: answers.roleId,
+          manager_id: answers.managerId,
+        },
+        (err, results) => {
+          if (err) throw err;
+          console.log("Employee added successfully");
+          mainMenuQuestions();
+        }
+      );
+    })
   );
-}));
 };
 //  .then((answers) => {
 //   //  const salary = parseFloat(answers.salary).toFixed(2)
 //   connection.query(
 //     "INSERT INTO employee SET ?",
-//    const employeeId = answers.employee 
-   
-     
-//      { title: answers.addRole, 
+//    const employeeId = answers.employee
+
+//      { title: answers.addRole,
 //       },
 //      (err, results) => {
 //        if (err) throw err;
@@ -248,7 +265,7 @@ const addEmployee = async () => {
 //    );
 //  })});
 // console.log("are u here")
- 
+
 // };
 // connection.query("SELECT * FROM employees", (err, results) => {
 //   if (err) throw err;
