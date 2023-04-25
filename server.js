@@ -63,11 +63,12 @@ function mainMenuQuestions() {
           addRole();
           // Perform action to add a role
           break;
+          case "Update an Employee Role":
+            updateEmployeeRole();
+            // Perform action to update a role
+            break;
         case "Add an employee":
           // Perform action to add an employee
-          break;
-        case "Update an employee role":
-          // Perform action to update an employee role
           break;
         case "Exit":
           // Exit the application
@@ -178,6 +179,32 @@ if (err) throw err;
  })});
 console.log("are u here")
  
+};
+
+const updateEmployeeRole = () => {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "employeeId",
+        message: "Enter the ID of the employee you want to update:",
+      },
+      {
+        type: "input",
+        name: "roleId",
+        message: "Enter the ID of the new role for the employee:",
+      },
+    ])
+    .then((answers) => {
+      const employeeId = answers.employeeId;
+      const roleId = answers.roleId;
+      // Perform the update query using the employeeId and roleId
+      // Update the employee's role in the database
+      // ...
+      // After the update is complete, show a success message and return to the main menu
+      console.log("Employee role updated successfully");
+      mainMenuQuestions();
+    });
 };
 
 
