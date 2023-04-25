@@ -155,10 +155,11 @@ if (err) throw err;
      message: "Enter the salary:",
    },
    {
-     type: "list",
-     message: "Chose department",
-     name: "department",
-     choices: departmentList
+      type: "list",
+      name: "department",
+      message: "Select the department:",
+      choices: ["Sales", "Engineering", "Finance", "Legal"]
+    
    },
  ])
  .then((answers) => {
@@ -276,55 +277,55 @@ const addEmployee = async () => {
     console.log("Employee added successfully");
     mainMenuQuestions();
   } catch (error) {
-    console.error(error);
-    mainMenuQuestions();
-  }
-};
- inquirer
- .prompt([
-   {
-     type: "input",
-     name: "firstName",
-     message: "Enter the first name of the employee:",
-   },
-   {
-     type: "input",
-     name: "lastName",
-     message: "Enter the last name of the employee:",
-   },
-   {
-     type: "list",
-     name: "roleId",
-     message: "Select the role:",
-   },
-   {
-     type: "list",
-     name: "managerId",
-     message: "Select employees manager",
-     choices: [
-      { name: "None", value: null },
-      ...managerList.map((manager) => ({
-        name: `${manager.first_name} ${manager.last_name}`,
-        value: manager.id,
-   })),
- ]}]
- .then((answers) => {
-  connection.query(
-    "INSERT INTO employee SET ?",
-    {
-      first_name: answers.firstName,
-      last_name: answers.lastName,
-      role_id: answers.roleId,
-      manager_id: answers.managerId,
-    },
-    (err, results) => {
-      if (err) throw err;
-      console.log("Employee added successfully");
-      mainMenuQuestions();
-    }
-  );
-}));
-;
+    console.error(error)
+}};
+//     mainMenuQuestions();
+//   }
+// };
+//  inquirer
+//  .prompt([
+//    {
+//      type: "input",
+//      name: "firstName",
+//      message: "Enter the first name of the employee:",
+//    },
+//    {
+//      type: "input",
+//      name: "lastName",
+//      message: "Enter the last name of the employee:",
+//    },
+//    {
+//      type: "list",
+//      name: "roleId",
+//      message: "Select the role:",
+//    },
+//    {
+//      type: "list",
+//      name: "managerId",
+//      message: "Select employees manager",
+//      choices: [
+//       { name: "None", value: null },
+//       ...managerList.map((manager) => ({
+//         name: `${manager.first_name} ${manager.last_name}`,
+//         value: manager.id,
+//    })),
+//  ]}]
+//  .then((answers) => {
+//   connection.query(
+//     "INSERT INTO employee SET ?",
+//     {
+//       first_name: answers.firstName,
+//       last_name: answers.lastName,
+//       role_id: answers.roleId,
+//       manager_id: answers.managerId,
+//     },
+//     (err, results) => {
+//       if (err) throw err;
+//       console.log("Employee added successfully");
+//       mainMenuQuestions();
+//     }
+//   );
+// }));                          commented out 280-here, weell one line below
 //  .then((answers) => {
 //   //  const salary = parseFloat(answers.salary).toFixed(2)
 //   connection.query(
