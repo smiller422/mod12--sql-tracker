@@ -68,6 +68,7 @@ function mainMenuQuestions() {
           // Perform action to update a role
           break;
         case "Add an employee":
+          addEmployee();
           // Perform action to add an employee
           break;
         case "Exit":
@@ -77,6 +78,25 @@ function mainMenuQuestions() {
       }
     });
 }
+
+
+const viewAllDepartments = () => {
+  connection.query("SELECT * FROM department", (err, results) => {
+    if (err) throw err;
+    console.table(results);
+    mainMenuQuestions();
+  });
+};
+const viewAllRoles = () => {
+  connection.query("SELECT * FROM department", (err, results) => {
+    if (err) throw err;
+    console.table(results);
+    mainMenuQuestions();
+  });
+};
+
+mainMenuQuestions();
+
 // WHEN I choose to view all employees
 // THEN I am presented with a formatted table showing employee data,
 //  including employee ids, first names, last names, job titles, departments, salaries,
@@ -97,22 +117,7 @@ const viewAllEmployees = () => {
   });
 };
 
-const viewAllDepartments = () => {
-  connection.query("SELECT * FROM department", (err, results) => {
-    if (err) throw err;
-    console.table(results);
-    mainMenuQuestions();
-  });
-};
-const viewAllRoles = () => {
-  connection.query("SELECT * FROM department", (err, results) => {
-    if (err) throw err;
-    console.table(results);
-    mainMenuQuestions();
-  });
-};
 
-mainMenuQuestions();
 
 const addDepartment = () => {
   inquirer
@@ -136,78 +141,83 @@ const addDepartment = () => {
     });
 };
 
-// async function addRole() {
-//   // Prompt the user for the role title, salary, and department ID
-//   const { title, salary, departmentId } = await inquirer.prompt([
-//     {
-//       type: "input",
-//       name: "title",
-//       message: "Enter the role title:",
-//     },
-//     {
-//       type: "input",
-//       name: "salary",
-//       message: "Enter the role salary:",
-//     },
-//     {
-//       type: "input",
-//       name: "departmentId",
-//       message: "Enter the department ID for the role:",
-//     },
-//   ]);
+const addRole = () => {
+  inquirer // Prompt the user for the role title, salary, and department ID
+    .prompt([
+      {
+        type: "input",
+        name: "title",
+        message: "Enter the role title:",
+      },
+      {
+        type: "input",
+        name: "salary",
+        message: "Enter the role salary:",
+      },
+      {
+        type: "input",
+        name: "departmentId",
+        message: "Enter the department ID for the role:",
+      },
+    ])
+    .then((answers) => {
+      connection.query(
+        "INSERT INTO role SET ?",
+        {
+          title: answers.title,
+          salary: answers.salary,
+          department_id: answers.departmentId,
+        },
+        (err, results) => {
+          if (err) throw err;
+          console.log("Role added successfully");
+          mainMenuQuestions();
+        }
+      );
+    });
+};
 
-//   const Connected = await connection;
-//   await Connected.query(
-//     "INSERT INTO role (title, department_id, salary) VALUES (?, ?, ?)",
-//     [title, departmentId, salary]
-//   );
-//   console.log("Role added!");
-//   await Connected.end();
-// }
-
-const addRole = async () => {
-  const query = util.promisify(connection.query).bind(connection);
-  let departmentList;
-  await query("SELECT * FROM department", (err, results) => {
-    console.log(results);
-    if (err) throw err;
-    departmentList = Object.values(results);
+//  
+  const addEmployee = () => {
     inquirer
-      .prompt([
+.prompt([
+      {
+        type: "input",
+        name: "firstName",
+        message: "Enter the employee's first name:",
+      },
+      {
+        type: "input",
+        name: "lastName",
+        message: "Enter the employee's last name:",
+      },
+      {
+        type: "input",
+        name: "roleId",
+        message: "Enter the employee's role ID:",
+      },
+      {
+        type: "input",
+        name: "managerId",
+        message: "Enter the employee's manager ID:",
+      },
+    ])
+    .then((answers) => {
+      connection.query(
+        "INSERT INTO employee SET ?",
         {
-          type: "input",
-          name: "title",
-          message: "Enter the name of the role:",
+          first_name: answers.firstName,
+          last_name: answers.lastName,
+          role_id: answers.roleId,
+          manager_id: answers.managerId,
         },
-        {
-          type: "input",
-          name: "salary",
-          message: "Enter the salary:",
-        },
-        {
-          type: "input",
-          name: "departmentId",
-          message: "Select the department by Id:",
-          choices: ["1", "2", "3", "4"],
-        },
-      ])
-      .then((answers) => {
-        const salary = parseInt(answers.salary).toFixed(2);
-        const departmentId = parseInt(answers.departmentName); //figure out how to get theid # of the deparment name variable
-        //  console.log(departmentName)
-        connection.query(
-          "INSERT INTO role(title, salary, department_id) VALUE (?)",
-          { title: answers.title, salary: salary, department_id: departmentId },
-          console.log(departmentId),
-          (err, results) => {
-            if (err) throw err;
-            console.log("Role added successfully");
-            mainMenuQuestions();
-          }
-        );
-      });
-  });
-  console.log("are u here");
+        (err, results) => {
+          if (err) throw err;
+          console.log("Employee added successfully");
+          mainMenuQuestions();
+        }
+      );
+    });
 };
 
 const updateEmployeeRole = () => {
@@ -216,172 +226,30 @@ const updateEmployeeRole = () => {
       {
         type: "input",
         name: "employeeId",
-        message: "Enter the ID of the employee you want to update:",
+        message: "Enter the employee's ID:",
       },
       {
         type: "input",
         name: "roleId",
-        message: "Enter the ID of the new role for the employee:",
+        message: "Enter the employee's new role ID:",
       },
     ])
     .then((answers) => {
-      const employeeId = answers.employeeId;
-      const roleId = answers.roleId;
-      // Perform the update query using the employeeId and roleId
-      // Update the employee's role in the database
-      // ...
-      // After the update is complete, show a success message and return to the main menu
-      console.log("Employee role updated successfully");
-      mainMenuQuestions();
+      connection.query(
+        "UPDATE employee SET ? WHERE ?",
+        [
+          {
+            role_id: answers.roleId,
+          },
+          {
+            id: answers.employeeId,
+          },
+        ],
+        (err, results) => {
+          if (err) throw err;
+          console.log("Employee role updated successfully");
+          mainMenuQuestions();
+        }
+      );
     });
-};
-
-// const addEmployee = async () => {
-//   const query = util.promisify(connection.query).bind(connection);
-//   const roles = await query("SELECT * FROM role");
-//   const employees = await query("SELECT * FROM employee");
-//   // let employeeList  = await query("SELECT * FROM employee");
-//   let employeeList = await query("SELECT * FROM role");
-//   // const managerList = await query("SELECT * FROM manager");
-//   const managerList = await query("SELECT * FROM employee");
-// //   await query("SELECT * FROM employee", (err, results) => {
-// // if (err) throw err;
-// //  employeeList = Object.values(results);
-
-const addEmployee = async () => {
-  try {
-    const query = util.promisify(connection.query).bind(connection);
-    const roles = await query("SELECT * FROM role");
-    const employees = await query("SELECT * FROM employee");
-
-    const roleChoices = roles.map((role) => ({
-      name: role.title,
-      value: role.id,
-    }));
-
-    const managerChoices = [
-      { name: "None", value: null },
-      ...employees
-        .filter((employee) => employee.manager_id === null)
-        .map((employee) => ({
-          name: `${employee.first_name} ${employee.last_name}`,
-          value: employee.id,
-        })),
-    ];
-
-    const answers = await inquirer.prompt([
-      {
-        type: "input",
-        name: "firstName",
-        message: "Enter the first name of the employee:",
-      },
-      {
-        type: "input",
-        name: "lastName",
-        message: "Enter the last name of the employee:",
-      },
-      {
-        type: "list",
-        name: "roleId",
-        message: "Select the role:",
-        choices: roleChoices,
-      },
-      {
-        type: "list",
-        name: "managerId",
-        message: "Select the manager:",
-        choices: managerChoices,
-      },
-    ]);
-
-    await query("INSERT INTO employee SET ?", {
-      first_name: answers.firstName,
-      last_name: answers.lastName,
-      role_id: answers.roleId,
-      manager_id: answers.managerId,
-    });
-
-    console.log("Employee added successfully");
-    mainMenuQuestions();
-  } catch (error) {
-    console.error(error);
-  }
-};
-//     mainMenuQuestions();
-//   }
-// };
-//  inquirer
-//  .prompt([
-//    {
-//      type: "input",
-//      name: "firstName",
-//      message: "Enter the first name of the employee:",
-//    },
-//    {
-//      type: "input",
-//      name: "lastName",
-//      message: "Enter the last name of the employee:",
-//    },
-//    {
-//      type: "list",
-//      name: "roleId",
-//      message: "Select the role:",
-//    },
-//    {
-//      type: "list",
-//      name: "managerId",
-//      message: "Select employees manager",
-//      choices: [
-//       { name: "None", value: null },
-//       ...managerList.map((manager) => ({
-//         name: `${manager.first_name} ${manager.last_name}`,
-//         value: manager.id,
-//    })),
-//  ]}]
-//  .then((answers) => {
-//   connection.query(
-//     "INSERT INTO employee SET ?",
-//     {
-//       first_name: answers.firstName,
-//       last_name: answers.lastName,
-//       role_id: answers.roleId,
-//       manager_id: answers.managerId,
-//     },
-//     (err, results) => {
-//       if (err) throw err;
-//       console.log("Employee added successfully");
-//       mainMenuQuestions();
-//     }
-//   );
-// }));                          commented out 280-here, weell one line below
-//  .then((answers) => {
-//   //  const salary = parseFloat(answers.salary).toFixed(2)
-//   connection.query(
-//     "INSERT INTO employee SET ?",
-//    const employeeId = answers.employee
-
-//      { title: answers.addRole,
-//       },
-//      (err, results) => {
-//        if (err) throw err;
-//        console.log("Employee added successfully");
-//        mainMenuQuestions()
-//      }
-//    );
-//  })});
-// console.log("are u here")
-
-// };
-// connection.query("SELECT * FROM employees", (err, results) => {
-//   if (err) throw err;
-//   const choices = results.map((employee) => ({
-//     name: `${employee.first_name} ${employee.last_name}`,
-//     value: employee.id,
-//   }));
-//   inquirer.prompt([
-//     {
-//       type: "list",
-//       name: "employeeId",
-//     },
-//   ]);
-// });
+}
