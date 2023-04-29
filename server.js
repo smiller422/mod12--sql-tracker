@@ -79,19 +79,40 @@ function mainMenuQuestions() {
     });
 }
 
-
 const viewAllDepartments = () => {
-  connection.query("SELECT * FROM department", (err, results) => {
+  connection.query("SELECT * FROM role", (err, results) => {
     if (err) throw err;
     console.table(results);
-    mainMenuQuestions();
+    inquirer
+      .prompt([
+        {
+          type: "confirm",
+          name: "return",
+          message: "return to main menu?",
+        },
+      ])
+      .then((answer) => {
+        mainMenuQuestions();
+      });
   });
 };
+
 const viewAllRoles = () => {
-  connection.query("SELECT * FROM department", (err, results) => {
+  connection.query("SELECT * FROM role", (err, results) => {
     if (err) throw err;
     console.table(results);
-    mainMenuQuestions();
+    inquirer
+      .prompt([
+        {
+          type: "confirm",
+          name: "return",
+          message: "return to main menu?",
+        },
+      ])
+      .then((answer) => {
+        if (answer.return) {
+         } mainMenuQuestions();
+      });
   });
 };
 
@@ -116,8 +137,6 @@ const viewAllEmployees = () => {
     mainMenuQuestions();
   });
 };
-
-
 
 const addDepartment = () => {
   inquirer
@@ -177,10 +196,10 @@ const addRole = () => {
     });
 };
 
-//  
-  const addEmployee = () => {
-    inquirer
-.prompt([
+//
+const addEmployee = () => {
+  inquirer
+    .prompt([
       {
         type: "input",
         name: "firstName",
@@ -252,4 +271,4 @@ const updateEmployeeRole = () => {
         }
       );
     });
-}
+};
