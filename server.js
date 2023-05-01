@@ -63,7 +63,7 @@ function mainMenuQuestions() {
           addRole();
           // Perform action to add a role
           break;
-        case "Update an Employee Role":
+        case "Update an employee role":
           updateEmployeeRole();
           // Perform action to update a role
           break;
@@ -137,6 +137,8 @@ const viewAllEmployees = () => {
     mainMenuQuestions();
   });
 };
+
+
 
 const addDepartment = () => {
   inquirer
